@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Specification: MyJobs</title>
+    <!-- Chosen Palette: "Slate" with "Teal" accent -->
+    <!-- Application Structure Plan: A responsive sidebar navigation structure is used instead of a linear document. This allows users (developers, PMs) to instantly jump to any section of the spec, such as "Backend API" or "Agent Logic," without scrolling. The content for each section is loaded into a main view panel. This task-oriented design is superior for a technical document as it facilitates quick reference and comparison between different system components. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: High-Level Architecture Diagram -> Goal: Clarify system flow -> Viz: HTML/CSS block diagram -> Interaction: Static visual -> Justification: Recreates the spec's diagram with better aesthetics than ASCII art, making the core architecture immediately understandable.
+        - Report Info: Data Model / Schema -> Goal: Organize database structure -> Viz: Accordion-style expandable lists -> Interaction: Click to expand/collapse -> Justification: Prevents overwhelming the user with all schema details at once. They can focus on one table at a time.
+        - Report Info: API Endpoints -> Goal: Detail API contract -> Viz: Grouped accordion lists -> Interaction: Click to expand/collapse -> Justification: Groups related endpoints (User, Profile) for logical organization and reduces initial visual clutter.
+        - Report Info: Technical Goals (90%/70% automation) -> Goal: Quantify success -> Viz: Bar Chart (Chart.js) -> Interaction: Hover for tooltips -> Justification: A visual chart makes the quantitative targets more impactful and easier to grasp than plain text.
+        - Report Info: Agentic System Logic -> Goal: Explain a process -> Viz: Styled step-by-step list -> Interaction: Static visual -> Justification: A clear, numbered flow is the most effective way to explain a sequential process without complex diagrams.
+        - Report Info: User Personas -> Goal: Define target users -> Viz: Titled cards -> Interaction: Static visual -> Justification: Separates personas into distinct, digestible blocks.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-64 bg-slate-800 text-white p-4 flex-shrink-0 transition-all duration-300 -translate-x-full sm:translate-x-0">
+            <h1 class="text-2xl font-bold mb-6 border-b border-slate-600 pb-4">MyJobs Spec v1.0</h1>
+            <nav id="main-nav" class="space-y-2">
+                <a href="#vision" class="nav-link block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200">1. Project Vision</a>
+                <a href="#architecture" class="nav-link block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200">2. Architecture</a>
+                <a href="#backend" class="nav-link block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200">3. Backend Spec</a>
+                <a href="#frontend" class="nav-link block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200">4. Frontend Spec</a>
+                <a href="#concerns" class="nav-link block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200">5. Core Logic</a>
+                <a href="#deployment" class="nav-link block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200">6. Deployment</a>
+                <a href="#suggestions" class="nav-link block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200">7. Enhancements</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-8 lg:p-10 bg-slate-100">
+            <button id="menu-toggle" class="sm:hidden mb-4 p-2 bg-slate-800 text-white rounded-md">Menu</button>
+            
+            <!-- Section 1: Project Vision -->
+            <section id="vision" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Project Foundation & Vision</h2>
+                <p class="mb-8 text-lg text-slate-600">This section outlines the core mission, business goals, and target users for MyJobs. It establishes the "why" behind the project, providing context for all technical and design decisions.</p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h3 class="text-xl font-semibold mb-2 text-teal-700">1.1 Mission Statement</h3>
+                    <p>MyJobs is an agentic, LLM-powered service that automates the entire job application lifecycle on LinkedIn. It acts as a personal AI agent to discover relevant job postings, submit tailored applications, and manage initial communications. Our mission is to eliminate the repetitive tasks of job hunting, allowing candidates to focus on preparing for interviews and landing their dream job.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-bold text-lg text-teal-700">Primary Goal</h4>
+                        <p class="text-4xl font-bold text-slate-800 mt-2">75%</p>
+                        <p class="text-slate-600">reduction in time users spend applying for jobs.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-bold text-lg text-teal-700">Secondary Goal</h4>
+                        <p class="text-4xl font-bold text-slate-800 mt-2">1,000</p>
+                        <p class="text-slate-600">active subscribers in the first year.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-bold text-lg text-teal-700">Technical Goal</h4>
+                        <p class="text-4xl font-bold text-slate-800 mt-2">90% / 70%</p>
+                        <p class="text-slate-600">automation for "Easy Apply" / Portal jobs.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">1.3 Target User Personas</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-teal-500">
+                            <h4 class="font-bold">"Active Job Seeker" Alex</h4>
+                            <p class="text-sm text-slate-600 mt-2">A software engineer frustrated with repetitive applications who wants to apply to dozens of relevant jobs weekly with maximum efficiency.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-teal-500">
+                            <h4 class="font-bold">"Passive Candidate" Priya</h4>
+                            <p class="text-sm text-slate-600 mt-2">A marketing manager open to new opportunities but lacking the time to search. She needs a system to monitor the market and apply to perfect-fit roles for her.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-teal-500">
+                            <h4 class="font-bold">"Recent Graduate" Sam</h4>
+                            <p class="text-sm text-slate-600 mt-2">A new graduate needing to apply to a high volume of entry-level positions. Sam requires a system that ensures each application is well-crafted and tracked.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Architecture -->
+            <section id="architecture" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">System Architecture & Technology Stack</h2>
+                <p class="mb-8 text-lg text-slate-600">This section provides a high-level overview of the system's components, the technologies used to build them, and the deployment strategy. It defines the technical landscape of the MyJobs platform.</p>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">2.1 High-Level Architecture</h3>
+                    <p class="mb-6 text-slate-600">The system is composed of a Next.js frontend communicating with a FastAPI backend. The backend manages data in a PostgreSQL database and orchestrates the Agentic Core, which performs the main automation tasks.</p>
+                    <div class="flex flex-col items-center p-6 bg-slate-50 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center p-4 bg-blue-100 text-blue-800 rounded-lg shadow">Frontend<br>(Next.js)</div>
+                            <div class="text-2xl font-mono text-slate-400">&lt;--&gt;</div>
+                            <div class="text-center p-4 bg-green-100 text-green-800 rounded-lg shadow">Backend<br>(FastAPI)</div>
+                            <div class="text-2xl font-mono text-slate-400">&lt;--&gt;</div>
+                            <div class="text-center p-4 bg-purple-100 text-purple-800 rounded-lg shadow">Database<br>(PostgreSQL)</div>
+                        </div>
+                        <div class="text-4xl my-4 text-slate-400">↓</div>
+                        <div class="text-center p-6 bg-yellow-100 text-yellow-800 rounded-lg shadow w-full max-w-md">
+                            <p class="font-bold">Agentic Core (Python)</p>
+                            <div class="mt-4 flex justify-around text-sm">
+                                <span>LinkedIn Scraper</span>
+                                <span>LLM Engine</span>
+                                <span>Voice Agent</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">2.2 Technology Stack</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center">
+                        <div class="p-4 bg-slate-100 rounded-lg">Next.js</div>
+                        <div class="p-4 bg-slate-100 rounded-lg">FastAPI</div>
+                        <div class="p-4 bg-slate-100 rounded-lg">PostgreSQL</div>
+                        <div class="p-4 bg-slate-100 rounded-lg">Playwright</div>
+                        <div class="p-4 bg-slate-100 rounded-lg">Ollama</div>
+                        <div class="p-4 bg-slate-100 rounded-lg">VAPI</div>
+                        <div class="p-4 bg-slate-100 rounded-lg">Docker</div>
+                        <div class="p-4 bg-slate-100 rounded-lg">Tailwind CSS</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 3: Backend Spec -->
+            <section id="backend" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Backend Specification</h2>
+                <p class="mb-8 text-lg text-slate-600">Here we define the backend's core components: the database schema that structures all persistent data and the API endpoints that provide an interface for the frontend application.</p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">3.1 Data Model / Schema</h3>
+                    <div class="space-y-2" id="accordion-schema">
+                        <!-- Accordion Items will be injected by JS -->
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">3.2 API Endpoint Specification</h3>
+                    <div class="space-y-2" id="accordion-api">
+                        <!-- Accordion Items will be injected by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Frontend Spec -->
+            <section id="frontend" class="content-section">
+                 <h2 class="text-3xl font-bold text-slate-900 mb-4">Frontend Specification</h2>
+                <p class="mb-8 text-lg text-slate-600">This section details the user-facing application, including the user's initial journey through the app and the design of the primary dashboard and its components.</p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">4.1 Onboarding Flow</h3>
+                    <ol class="relative border-l border-slate-300 ml-3">                  
+                        <li class="mb-10 ml-6">            
+                            <span class="absolute flex items-center justify-center w-6 h-6 bg-teal-200 rounded-full -left-3 ring-8 ring-white">1</span>
+                            <h4 class="font-semibold">Sign Up</h4>
+                            <p class="text-sm text-slate-600">User provides Email and Password.</p>
+                        </li>
+                        <li class="mb-10 ml-6">
+                            <span class="absolute flex items-center justify-center w-6 h-6 bg-teal-200 rounded-full -left-3 ring-8 ring-white">2</span>
+                            <h4 class="font-semibold">Profile Setup</h4>
+                            <p class="text-sm text-slate-600">User enters Full Name and Phone Number.</p>
+                        </li>
+                        <li class="mb-10 ml-6">
+                           <span class="absolute flex items-center justify-center w-6 h-6 bg-teal-200 rounded-full -left-3 ring-8 ring-white">3</span>
+                            <h4 class="font-semibold">LinkedIn Credentials</h4>
+                            <p class="text-sm text-slate-600">User securely inputs LinkedIn email and password.</p>
+                        </li>
+                         <li class="mb-10 ml-6">
+                           <span class="absolute flex items-center justify-center w-6 h-6 bg-teal-200 rounded-full -left-3 ring-8 ring-white">4</span>
+                            <h4 class="font-semibold">Resume Upload</h4>
+                            <p class="text-sm text-slate-600">User uploads a base resume (PDF/DOCX), which is parsed to text.</p>
+                        </li>
+                         <li class="ml-6">
+                           <span class="absolute flex items-center justify-center w-6 h-6 bg-teal-200 rounded-full -left-3 ring-8 ring-white">5</span>
+                            <h4 class="font-semibold">Create First Job Profile</h4>
+                            <p class="text-sm text-slate-600">User is guided to create their first search profile (job titles, locations, etc.).</p>
+                        </li>
+                    </ol>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">4.2 Main Dashboard Components</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-semibold">Application Kanban Board</h4>
+                            <p class="text-sm text-slate-600">A Trello-like board with columns for `Applied`, `Interview`, `Offer`, `Rejected` for easy visual tracking.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-semibold">Application List View</h4>
+                            <p class="text-sm text-slate-600">A detailed table view of all applications, which is sortable and searchable.</p>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-semibold">Agent Status Panel</h4>
+                            <p class="text-sm text-slate-600">Shows the agent's last run time and current status, with a "Run Now" button for manual triggering.</p>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-semibold">Job Profiles Page</h4>
+                            <p class="text-sm text-slate-600">A dedicated page to create, edit, and toggle job search profiles on or off.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Section 5: Core Logic -->
+            <section id="concerns" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Core Logic & Cross-Cutting Concerns</h2>
+                 <p class="mb-8 text-lg text-slate-600">This section describes the system-wide logic that powers MyJobs, including the agent's operational flow, the voice call integration, and critical security measures.</p>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">5.1 Agentic System Logic Flow</h3>
+                     <div class="space-y-4">
+                        <p><strong>1. Trigger:</strong> Runs on a 4-hour schedule or manually.</p>
+                        <p><strong>2. Login:</strong> Uses Playwright to log into LinkedIn.</p>
+                        <p><strong>3. Search:</strong> Performs searches based on active job profiles.</p>
+                        <p><strong>4. Discover & Filter:</strong> Scrapes results, discarding existing applications.</p>
+                        <p><strong>5. Apply:</strong> LLM tailors resume text for each new job and the agent fills the application.</p>
+                        <p><strong>6. Follow-up:</strong> LLM generates and sends a message to the hiring team if available.</p>
+                        <p><strong>7. Update DB:</strong> The agent logs the new application status and artifacts.</p>
+                     </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                       <h3 class="text-xl font-semibold mb-4 text-teal-700">5.2 VAPI Voice Call Integration</h3>
+                       <p class="text-slate-600">A VAPI phone number is provisioned to each user. When recruiters call, the voice agent's goal is to confirm interest and schedule an interview by accessing the user's calendar. Call transcripts are sent to the backend to update the application status.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                       <h3 class="text-xl font-semibold mb-4 text-teal-700">5.3 Security Measures</h3>
+                       <ul class="list-disc list-inside text-slate-600 space-y-2">
+                           <li>LinkedIn credentials are encrypted in the database.</li>
+                           <li>All client-server communication is over HTTPS.</li>
+                           <li>Agent includes rate limiting and randomized delays to mimic human behavior and avoid detection.</li>
+                       </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 6: Deployment -->
+            <section id="deployment" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Environment & Deployment</h2>
+                <p class="mb-8 text-lg text-slate-600">This section provides the necessary information for setting up a local development environment and understanding the deployment process.</p>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">6.1 Environment Variables (.env.example)</h3>
+                    <pre class="bg-slate-800 text-white p-4 rounded-lg text-sm overflow-x-auto"><code>DATABASE_URL=postgresql://user:password@db:5432/myjobs
+JWT_SECRET_KEY=yoursecretkey
+ENCRYPTION_KEY=yoursecretencryptionkey
+OLLAMA_HOST=http://ollama:11434
+VAPI_API_KEY=yourvapikey</code></pre>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                     <h3 class="text-xl font-semibold mb-4 text-teal-700">6.2 Local Development Setup</h3>
+                     <ol class="list-decimal list-inside text-slate-600 space-y-2">
+                         <li>Clone the repository from the source.</li>
+                         <li>Create a `.env` file from the provided `.env.example` and fill in the values.</li>
+                         <li>Run `docker-compose up --build` from the project root.</li>
+                         <li>The Next.js application will be available at `http://localhost:3000`.</li>
+                     </ol>
+                </div>
+            </section>
+
+             <!-- Section 7: Suggestions -->
+            <section id="suggestions" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Future Enhancements</h2>
+                <p class="mb-8 text-lg text-slate-600">This section lists potential new features and improvements to make MyJobs an even more powerful and indispensable tool for job seekers.</p>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-semibold text-teal-700 mb-2">AI-Powered Resume Builder</h4>
+                        <p class="text-sm text-slate-600">LLM analyzes the user's resume and suggests improvements to make it more ATS-friendly.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-semibold text-teal-700 mb-2">Interview Preparation Module</h4>
+                        <p class="text-sm text-slate-600">For scheduled interviews, automatically create a "Prep Kit" with company research and likely questions.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-semibold text-teal-700 mb-2">"Smart Follow-up" Cadence</h4>
+                        <p class="text-sm text-slate-600">Create an automated follow-up sequence instead of a single message.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-semibold text-teal-700 mb-2">Analytics & Insights</h4>
+                        <p class="text-sm text-slate-600">Provide users with data on their job search, such as which keywords get the most responses.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-semibold text-teal-700 mb-2">Email Integration</h4>
+                        <p class="text-sm text-slate-600">Allow the agent to manage a dedicated folder in the user's email to catch recruiter messages.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="font-semibold text-teal-700 mb-2">"Cover Letter on Demand"</h4>
+                        <p class="text-sm text-slate-600">A button to generate a compelling, customized cover letter for any application.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-700">Automation Target Visualization</h3>
+                    <div class="chart-container">
+                        <canvas id="goalsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    function navigateTo(hash) {
+        // Fallback to the first section if hash is invalid or empty
+        if (!hash || !document.querySelector(hash)) {
+            hash = '#vision';
+        }
+
+        // Update active link
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === hash) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Show active content
+        contentSections.forEach(section => {
+            if ('#' + section.id === hash) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
+            }
+        });
+        
+        // Hide sidebar on mobile after navigation
+        if (window.innerWidth < 640) {
+            sidebar.classList.add('-translate-x-full');
+        }
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            history.pushState(null, null, targetId);
+            navigateTo(targetId);
+        });
+    });
+
+    window.addEventListener('popstate', () => {
+        navigateTo(window.location.hash);
+    });
+
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+    });
+
+    // --- Accordion Data ---
+    const schemaData = {
+        'users': ['id (UUID, PK)', 'email (VARCHAR, UNIQUE)', 'password_hash (VARCHAR)', 'linkedin_username (VARCHAR)', 'linkedin_password_encrypted (VARCHAR)', 'full_name (VARCHAR)', 'phone_number (VARCHAR)', 'created_at (TIMESTAMPTZ)'],
+        'resumes': ['id (UUID, PK)', 'user_id (UUID, FK)', 'resume_text (TEXT)', 'file_url (VARCHAR)', 'uploaded_at (TIMESTAMPTZ)'],
+        'job_profiles': ['id (UUID, PK)', 'user_id (UUID, FK)', 'profile_name (VARCHAR)', 'search_keywords (TEXT)', 'locations (TEXT)', 'experience_levels (TEXT)', 'is_active (BOOLEAN)', 'created_at (TIMESTAMPTZ)'],
+        'applications': ['id (UUID, PK)', 'user_id (UUID, FK)', 'job_profile_id (UUID, FK)', 'job_title (VARCHAR)', 'company_name (VARCHAR)', 'linkedin_job_url (VARCHAR, UNIQUE)', 'status (ENUM)', 'applied_at (TIMESTAMPTZ)', 'tailored_resume_text (TEXT)', 'follow_up_message_text (TEXT)', 'notes (TEXT)'],
+        'interviews': ['id (UUID, PK)', 'application_id (UUID, FK)', 'scheduled_time (TIMESTAMPTZ)', 'interviewer_name (VARCHAR)', 'details (TEXT)']
+    };
+
+    const apiData = {
+        'User & Auth': [
+            { method: 'POST', path: '/auth/register', desc: 'Creates a new user.' },
+            { method: 'POST', path: '/auth/login', desc: 'Authenticates a user, returns JWT.' },
+            { method: 'PUT', path: '/users/me', desc: 'Updates user details.' }
+        ],
+        'Profile & Resume': [
+            { method: 'POST', path: '/resumes', desc: 'Uploads a user\'s base resume.' },
+            { method: 'GET', path: '/resumes', desc: 'Retrieves the user\'s resume.' },
+            { method: 'POST', path: '/job_profiles', desc: 'Creates a new job search profile.' },
+            { method: 'GET', path: '/job_profiles', desc: 'Lists all job profiles.' },
+            { method: 'PUT', path: '/job_profiles/{id}', desc: 'Updates a job profile.' },
+            { method: 'DELETE', path: '/job_profiles/{id}', desc: 'Deletes a job profile.' }
+        ],
+        'Applications': [
+            { method: 'GET', path: '/applications', desc: 'Retrieves all job applications.' },
+            { method: 'GET', path: '/applications/{id}', desc: 'Gets details for one application.' }
+        ],
+        'Agent Control': [
+            { method: 'POST', path: '/agent/start', desc: 'Manually triggers an agent cycle.' },
+            { method: 'GET', path: '/agent/status', desc: 'Gets the current agent status.' }
+        ]
+    };
+    
+    function createAccordion(containerId, data, type) {
+        const container = document.getElementById(containerId);
+        Object.keys(data).forEach(key => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'border border-slate-200 rounded-lg';
+            
+            const button = document.createElement('button');
+            button.className = 'w-full text-left p-4 font-semibold bg-slate-100 hover:bg-slate-200 transition-colors duration-200 flex justify-between items-center';
+            button.innerHTML = `<span>${key}</span><span class="transform transition-transform duration-300">▼</span>`;
+            
+            const content = document.createElement('div');
+            content.className = 'accordion-content bg-white p-4';
+            
+            const ul = document.createElement('ul');
+            ul.className = 'space-y-2 text-sm';
+            
+            if (type === 'schema') {
+                data[key].forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'font-mono text-slate-700';
+                    li.textContent = item;
+                    ul.appendChild(li);
+                });
+            } else if (type === 'api') {
+                 data[key].forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-baseline space-x-2';
+                    const methodClass = item.method === 'POST' ? 'bg-blue-500' : item.method === 'GET' ? 'bg-green-500' : item.method === 'PUT' ? 'bg-orange-500' : 'bg-red-500';
+                    li.innerHTML = `<span class="font-bold text-xs text-white ${methodClass} rounded px-2 py-1">${item.method}</span> <code class="font-mono text-slate-800">${item.path}</code> <span class="text-slate-500 flex-1 text-right">${item.desc}</span>`;
+                    ul.appendChild(li);
+                });
+            }
+
+            content.appendChild(ul);
+            wrapper.appendChild(button);
+            wrapper.appendChild(content);
+            container.appendChild(wrapper);
+
+            button.addEventListener('click', () => {
+                const icon = button.querySelector('span:last-child');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+    }
+
+    createAccordion('accordion-schema', schemaData, 'schema');
+    createAccordion('accordion-api', apiData, 'api');
+
+
+    // --- Chart.js ---
+    function initializeChart() {
+        const ctx = document.getElementById('goalsChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['"Easy Apply" Automation', 'Career Portal Automation'],
+                    datasets: [{
+                        label: 'Automation Success Rate Target (%)',
+                        data: [90, 70],
+                        backgroundColor: [
+                            'rgba(13, 148, 136, 0.6)', // teal-600
+                            'rgba(15, 118, 110, 0.6)'  // teal-700
+                        ],
+                        borderColor: [
+                            'rgba(13, 148, 136, 1)',
+                            'rgba(15, 118, 110, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                             ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Technical Automation Goals'
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    // Initial load
+    navigateTo(window.location.hash);
+    initializeChart();
+
+});
+</script>
+</body>
+</html>
